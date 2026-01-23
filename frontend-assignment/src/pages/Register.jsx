@@ -15,6 +15,7 @@ function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
       const res = await fetch(`${API_URL}/register`, {
         method: "POST",
@@ -24,12 +25,11 @@ function Register() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Registration failed");
-      }
+      const data = await res.json();
 
-      await res.json(); // success response (message)
+      if (!res.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
 
       navigate("/login");
     } catch (err) {

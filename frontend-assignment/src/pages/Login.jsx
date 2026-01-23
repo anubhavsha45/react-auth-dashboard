@@ -15,6 +15,7 @@ function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
       const res = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -24,12 +25,11 @@ function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Login failed");
-      }
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
 
       localStorage.setItem("token", data.token);
       navigate("/dashboard");
