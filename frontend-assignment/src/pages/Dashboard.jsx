@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = "https://react-auth-dashboard.onrender.com";
+
 function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -18,7 +20,7 @@ function Dashboard() {
 
   async function fetchTasks() {
     try {
-      const res = await fetch("http://localhost:5000/tasks", {
+      const res = await fetch(`${API_URL}/tasks`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -34,22 +36,27 @@ function Dashboard() {
   }
 
   async function fetchProfile() {
-    const res = await fetch("http://localhost:5000/profile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const res = await fetch(`${API_URL}/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const data = await res.json();
-    console.log("PROFILE DATA:", data);
-    setUser(data);
+      if (!res.ok) throw new Error("Failed to fetch profile");
+
+      const data = await res.json();
+      setUser(data);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async function addTask(e) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const res = await fetch("http://localhost:5000/tasks", {
+    const res = await fetch(`${API_URL}/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,7 +71,7 @@ function Dashboard() {
   }
 
   async function deleteTask(id) {
-    await fetch(`http://localhost:5000/tasks/${id}`, {
+    await fetch(`${API_URL}/tasks/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -75,7 +82,7 @@ function Dashboard() {
   }
 
   async function toggleTask(id) {
-    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+    const res = await fetch(`${API_URL}/tasks/${id}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -97,7 +104,7 @@ function Dashboard() {
 
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div className="card shadow p-4" style={{ width: "400px" }}>
+      <div className="card shadow p-4 w-100" style={{ maxWidth: "400px" }}>
         <div className="d-flex justify-content-between align-items-center mb-1">
           <h3 className="mb-0">Dashboard</h3>
           <button
@@ -136,6 +143,12 @@ function Dashboard() {
         {error && <div className="alert alert-danger py-1">{error}</div>}
 
         <ul className="list-group">
+          {filteredTasks.length === 0 && (
+            <li className="list-group-item text-muted text-center">
+              No tasks yet. Add your first task.
+            </li>
+          )}
+
           {filteredTasks.map((task) => (
             <li
               key={task.id}

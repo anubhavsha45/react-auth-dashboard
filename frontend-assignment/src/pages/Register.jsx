@@ -12,7 +12,7 @@ function Register() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/register", {
+      const res = await fetch("https://react-auth-dashboard.onrender.com/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
