@@ -26,7 +26,10 @@ function Dashboard() {
         },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch tasks");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Failed to fetch tasks: " + text);
+      }
 
       const data = await res.json();
       setTasks(data);
@@ -43,7 +46,10 @@ function Dashboard() {
         },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch profile");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Failed to fetch profile: " + text);
+      }
 
       const data = await res.json();
       setUser(data);
@@ -56,41 +62,68 @@ function Dashboard() {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const res = await fetch(`${API_URL}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ title }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title }),
+      });
 
-    const data = await res.json();
-    setTasks((prev) => [...prev, data]);
-    setTitle("");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Failed to add task: " + text);
+      }
+
+      const data = await res.json();
+      setTasks((prev) => [...prev, data]);
+      setTitle("");
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   async function deleteTask(id) {
-    await fetch(`${API_URL}/tasks/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const res = await fetch(`${API_URL}/tasks/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Failed to delete task: " + text);
+      }
+
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   async function toggleTask(id) {
-    const res = await fetch(`${API_URL}/tasks/${id}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const res = await fetch(`${API_URL}/tasks/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const updated = await res.json();
-    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Failed to update task: " + text);
+      }
+
+      const updated = await res.json();
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   function handleLogout() {

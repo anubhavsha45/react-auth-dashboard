@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
+const API_URL = "https://react-auth-dashboard.onrender.com";
+
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +14,7 @@ function Register() {
     setError("");
 
     try {
-      const res = await fetch("https://react-auth-dashboard.onrender.com/", {
+      const res = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,11 +22,12 @@ function Register() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.message || "Registration failed");
+        const text = await res.text();
+        throw new Error(text || "Registration failed");
       }
+
+      await res.json(); // success response (message)
 
       navigate("/login");
     } catch (err) {

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
+const API_URL = "https://react-auth-dashboard.onrender.com";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +14,7 @@ function Login() {
     setError("");
 
     try {
-      const res = await fetch("https://react-auth-dashboard.onrender.com", {
+      const res = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,11 +22,12 @@ function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.message || "Login failed");
+        const text = await res.text();
+        throw new Error(text || "Login failed");
       }
+
+      const data = await res.json();
 
       localStorage.setItem("token", data.token);
       navigate("/dashboard");
