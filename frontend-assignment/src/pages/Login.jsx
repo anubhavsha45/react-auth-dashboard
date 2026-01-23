@@ -7,12 +7,14 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -33,6 +35,8 @@ function Login() {
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -64,7 +68,9 @@ function Login() {
             />
           </div>
 
-          <button className="btn btn-primary w-100">Login</button>
+          <button className="btn btn-primary w-100" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
 
         {error && <div className="alert alert-danger mt-3 py-1">{error}</div>}

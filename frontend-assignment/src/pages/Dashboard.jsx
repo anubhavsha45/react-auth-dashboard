@@ -9,13 +9,20 @@ function Dashboard() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetchTasks();
-    fetchProfile();
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    Promise.all([fetchTasks(), fetchProfile()]).finally(() =>
+      setLoading(false),
+    );
   }, []);
 
   async function fetchTasks() {
@@ -134,6 +141,14 @@ function Dashboard() {
   const filteredTasks = tasks.filter((t) =>
     t.title.toLowerCase().includes(search.toLowerCase()),
   );
+
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-primary" role="status" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">

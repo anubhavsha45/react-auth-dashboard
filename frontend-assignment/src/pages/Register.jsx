@@ -7,12 +7,14 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/register`, {
         method: "POST",
@@ -32,6 +34,8 @@ function Register() {
       navigate("/login");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -63,7 +67,9 @@ function Register() {
             />
           </div>
 
-          <button className="btn btn-primary w-100">Sign Up</button>
+          <button className="btn btn-primary w-100" disabled={loading}>
+            {loading ? "Creating..." : "Sign Up"}
+          </button>
         </form>
 
         {error && <div className="alert alert-danger mt-3 py-1">{error}</div>}
